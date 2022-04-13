@@ -1,6 +1,6 @@
 clc;
 
-load('C:\Users\Eléonore\Desktop\2A\P2I\Projet\echantillon.jpg');
+load treated_data/bw_braille_scan.jpg
 Im1 = imread('echantillon.jpg','jpeg');
 
 BW = im2bw (Im1,0.4);
