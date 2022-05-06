@@ -1,30 +1,18 @@
-clc;
+close all;clear;
+set(gcf, 'WindowState','maximized');
 
-load treated_data/bw_braille_scan.jpg
-Im1 = imread('treated_data/bw_braille_scan.jpg','jpeg');
-T = graythresh(Im1)
-BW = im2bw (Im1,T);
+I = imread('braille_scan.jpg','jpeg');
+I=rgb2gray(I);
+subplot(1,3,1)
+imshow(I)
+l=graythresh(I);
+bw=imbinarize(I,l);
+bw=imcomplement(bw);
+subplot(1,3,2)
+imshow(bw);
+%impixelregion
+I2 = imerode(bw,strel('square',4));
+I2 = imdilate(bw,strel('diamond',1));
 
-imshow(BW, []);
-CC = bwconncomp(BW);
-S = regionprops(CC,'Centroid');
-
-S(2)
-%figure;
-for i=2 : 3049(S)
-    plot(S(i(1)),S(i(2)));
-end
-
-
-%BW=Im1>1000;
-%{
-rp=regionprops(Im1,"Area");
-disp('Centroiding is done.');
-figure(1); image(Im1); axis image; hold on;
-n=numel(rp);
-%for i=1:n
-%        plot(rp(i).Area(1), rp(i).Area(2), 'r*')
-%end
-%}
-
-%function label
+subplot(1,3,3)
+imshow(I2);
