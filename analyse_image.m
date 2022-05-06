@@ -1,18 +1,18 @@
-close all;clear;
+close all
+clear
+clc
 set(gcf, 'WindowState','maximized');
-
-I = imread('braille_scan.jpg','jpeg');
+name_image = "braille_scan";
+I = imread("raw_data/"+name_image,'jpg');
 I=rgb2gray(I);
-subplot(1,3,1)
 imshow(I)
 l=graythresh(I);
 bw=imbinarize(I,l);
 bw=imcomplement(bw);
-subplot(1,3,2)
+subplot(1,2,1)
 imshow(bw);
 %impixelregion
-I2 = imerode(bw,strel('square',4));
-I2 = imdilate(bw,strel('diamond',1));
-
-subplot(1,3,3)
+I2 = xor(bwareaopen(bw,0),bwareaopen(bw,50));
+subplot(1,2,2)
 imshow(I2);
+imwrite(I2,"treated_data/bw_"+name_image+".jpg");
