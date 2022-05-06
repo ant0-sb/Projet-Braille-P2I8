@@ -1,3 +1,5 @@
 #Ignores matlab autosave files
 *.asv
-antonin_traitement.m
+*antonin_traitement.m
+#Les fichiers qu'Eléonore garde perso 
+*eleo.m
