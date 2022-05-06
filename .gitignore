@@ -1,5 +1,4 @@
-#Ignores matlab autosave files
+#Ignore les fichiers autosave de matlab
 *.asv
-*antonin_traitement.m
-#Les fichiers qu'Eléonore garde perso 
-*eleo.m
+#Ignore les fichiers que chacun garde perso
+*local.m
