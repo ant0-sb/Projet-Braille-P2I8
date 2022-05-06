@@ -1,5 +1,4 @@
 clc
 clear
 close all
-
-imread("treated_data\bw_braille.jpg")
+I = imread("treated_data\bw_braillePierre.jpg");
