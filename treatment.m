@@ -2,11 +2,13 @@ close all
 clear
 clc
 name_image = "braille_scan_01";
-I = imread("raw_data/"+name_image,'jpg');
-% Converts RGB to grayscale if image is RGB.
-I=RGB2gray(I);   
-l=graythresh(I);
-bw=imbinarize(I,l);
-bw=imcomplement(bw);
-I2 = xor(bwareaopen(bw,0),bwareaopen(bw,50));
-imwrite(I2,"treated_data/bw_"+name_image+".jpg");
+im0 = imread("raw_data/"+name_image,'jpg');
+im1 = rgb2gray(im0); 
+BW = imbinarize(im1, 0.7);
+BW = imcomplement (BW);
+BW = imdilate (BW, strel('disk',1));
+BW1 = bwpropfilt(BW,'Area', [0 50]);
+BW2 = xor(bwareaopen(BW,0),  bwareaopen(BW,50));
+
+BW1short = BW1 (50:1500, 80:1000);
+imwrite(BW1short,"treated_data/bw_"+name_image+".jpg");
