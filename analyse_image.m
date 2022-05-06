@@ -1,21 +1,18 @@
-clc;
-
-load treated_data/bw_braille_scan.jpg
-Im1 = imread('echantillon.jpg','jpeg');
-
-BW = im2bw (Im1,0.4);
-imshow(BW, []);
-[label, n] = bwlabel(Im1);
-
-%BW=Im1>1000;
-%{
-rp=regionprops(Im1,"Area");
-disp('Centroiding is done.');
-figure(1); image(Im1); axis image; hold on;
-n=numel(rp);
-%for i=1:n
-%        plot(rp(i).Area(1), rp(i).Area(2), 'r*')
-%end
-%}
-
-%function label
+close all
+clear
+clc
+set(gcf, 'WindowState','maximized');
+name_image = "braille_scan";
+I = imread("raw_data/"+name_image,'jpg');
+I=rgb2gray(I);
+imshow(I)
+l=graythresh(I);
+bw=imbinarize(I,l);
+bw=imcomplement(bw);
+subplot(1,2,1)
+imshow(bw);
+%impixelregion
+I2 = xor(bwareaopen(bw,0),bwareaopen(bw,50));
+subplot(1,2,2)
+imshow(I2);
+imwrite(I2,"treated_data/bw_"+name_image+".jpg");
