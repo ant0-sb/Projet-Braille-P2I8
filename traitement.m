@@ -1,4 +1,4 @@
-%Objctif : Modification de l'image de orginiale pour permettre plus tard une reconaissance plus facile
+%Objectif : Modification de l'image de orginiale pour permettre plus tard une reconaissance plus facile
 close all
 clear var
 clc
