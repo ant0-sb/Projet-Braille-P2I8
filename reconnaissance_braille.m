@@ -20,16 +20,16 @@ deja_scannes = []; %vecteur contenant tout les indices des points déjà analys�
 for i=(1:length(x_centroids)) %boucle sur toutes les coordonnées X des points détectés
     if not(ismember(i,deja_scannes)) %check pour éviter une redondance
         deja_scannes(end+1) = i; %on ajoute l'indice du point de réference
-        col_x = [x_centroids(i)]; %coordonées en X des points de notre
-        col_y = [y_centroids(i)]; %coordonées en Y des points de notre ligne
+        ligne_x = [x_centroids(i)]; %coordonées en X des points de notre ligne
+        ligne_y = [y_centroids(i)]; %coordonées en Y des points de notre ligne
         for j=(1:length(y_centroids))
             if (abs(y_centroids(i)-y_centroids(j)) < precision_ligne) && j~=i %comparaison des coordonnées Y de 2 points, si < à variable alors ils appartiennent à une même ligne
-                col_x(end+1) = x_centroids(j);
-                col_y(end+1)= y_centroids(j);
+                ligne_x(end+1) = x_centroids(j);
+                ligne_y(end+1)= y_centroids(j);
                 deja_scannes(end+1) = j; %on ajoute l'indice du point comparé
             end
         end
-        plot(col_x,col_y,'.', 'MarkerSize',10)
+        plot(ligne_x,ligne_y,'.', 'MarkerSize',10)
         %waitforbuttonpress
         %pause(0.05)
     end
