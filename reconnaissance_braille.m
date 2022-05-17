@@ -7,16 +7,17 @@ st = regionprops(I, 'Centroid'); %structure = matrice de classe
 c = vertcat(st.Centroid);
 x_centroids = c(:,1); %Coordonnées X des points détectés
 y_centroids = c(:,2); %Coordonnées Y des points détectés
-precision_ligne = 3; %Nombre de pixel max entre 2 points d'une même ligne, expérimentalement c'est mieux entre 3 et 4. Voir dossier rapport
-precision_col = 8; %Nombre de pixel max entre 2 points d'une même col, expérimentalement c'est mieux entre 2 et 10. Voir dossier rapport
+precision_ligne = 5; %Nombre de pixel max entre 2 points d'une même ligne, expérimentalement c'est mieux entre 3 et 4. Voir dossier rapport
+precision_col = 5; %Nombre de pixel max entre 2 points d'une même col, expérimentalement c'est mieux entre 2 et 10. Voir dossier rapport
 
+%% Affichage de tout les centroids
+%%figure; imshow(I); hold on; plot(x_centroids,y_centroids, 'b+'); hold off
 
-%Affichage de tout les centroids
-% plot(x_centroids,y_centroids, 'b+')
-
-%% Affichage des lignes
-imshow(I); hold on;
+%% Affichage & stockage des lignes
+figure; imshow(I); hold on;
+o = 1;
 deja_scannes = []; %vecteur contenant tout les indices des points déjà analysés 
+matrice_lignes = cell(2,1);
 for i=(1:length(x_centroids)) %boucle sur toutes les coordonnées X des points détectés
     if not(ismember(i,deja_scannes)) %check pour éviter une redondance
         deja_scannes(end+1) = i; %on ajoute l'indice du point de réference
@@ -30,6 +31,12 @@ for i=(1:length(x_centroids)) %boucle sur toutes les coordonnées X des points d
             end
         end
         plot(ligne_x,ligne_y,'.', 'MarkerSize',10)
+        ligne_tot = cell(1,length(ligne_x));
+        for k = (1:length(ligne_x))
+            ligne_tot{k} = [ligne_x(k) ligne_y(k)];
+        end
+        matrice_lignes{o}= ligne_tot;
+        o=o+1;
         %waitforbuttonpress
         %pause(0.05)
     end
