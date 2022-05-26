@@ -2,3 +2,4 @@
 *.asv
 #Ignore les fichiers que chacun garde perso
 *local.m
+*test.m
