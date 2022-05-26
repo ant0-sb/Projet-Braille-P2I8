@@ -126,6 +126,18 @@ hold off
 matrice_lignes = sortrows(matrice_lignes,2);
 matrice_colonnes = sortrows(matrice_colonnes,2);
 liste_medianes = vertcat(matrice_colonnes{:,3});
+%boucle if
+liste_sauts_medianes = zeros(length(liste_medianes)-1,1);
+for i=2:length(liste_medianes)
+    liste_sauts_medianes(i-1)=liste_medianes(i)-liste_medianes(i-1);
+end
+saut_median = median(liste_sauts_medianes)
+for i=1:length(liste_sauts_medianes)
+    if liste_sauts_medianes(i)>1.5*saut_median
+        liste_medianes = vertcat(liste_medianes(1:i),(liste_medianes(i+1)+liste_medianes(i))/2,liste_medianes(i+1:end));
+    end
+end
+
 matrice_tot=zeros(length(matrice_lignes),length(matrice_colonnes));
 for i=1 : length(matrice_lignes)
     for j=1 : length (matrice_lignes{i}) %tous les points de la ligne i
