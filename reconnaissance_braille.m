@@ -44,6 +44,9 @@ for ecart=100:50:milieu_feuille_horizontal
             matrice_lignes{indice_ligne,2}= mean(ligne_y);
         end
     end
+    x_centroids(deja_scannes) = []; %Suppression des points déjà scannés
+    y_centroids(deja_scannes) = [];
+    deja_scannes = []; %réinitialisation de la liste
     %Partie 2: Ajout des points appartenant à une ligne mais pas détectés précédemment car trop loin pour rentrer dans les conditions strictes de départ
     for precision=0.2:0.5:5+ecart/300
         for i=(1:length(x_centroids))
@@ -51,7 +54,6 @@ for ecart=100:50:milieu_feuille_horizontal
 
                 for m=(1:length(matrice_lignes))
                     if (abs(y_centroids(i)-matrice_lignes{m,2}) < precision) && not(ismember(i,deja_scannes))%comparaison par rapport à la valeur moyenne d'une ligne
-                        imshow(I);
                         matrice_lignes{m,1}(end+1) = {[x_centroids(i) y_centroids(i)]};
                         A = vertcat(matrice_lignes{m,1}{:});
                         matrice_lignes{m,2}=mean(A(:,2));
@@ -61,6 +63,9 @@ for ecart=100:50:milieu_feuille_horizontal
             end
         end
     end
+    x_centroids(deja_scannes) = []; %Suppression des points déjà scannés
+    y_centroids(deja_scannes) = [];
+    deja_scannes = []; %réinitialisation de la liste
 end
 imshow(I); hold on;
 for i=(1:length(matrice_lignes))
@@ -99,6 +104,9 @@ for ecart=100:20:milieu_feuille_vertical
 
         end
     end
+    x_centroids(deja_scannes) = []; %Suppression des points déjà scannés
+    y_centroids(deja_scannes) = [];
+    deja_scannes = []; %réinitialisation de la liste
     %Partie 2: Ajout des points appartenant à une colonne mais pas détectés précédemment car trop loin pour rentrer dans les conditions strictes de départ
     for precision=0.2:0.2:4+ecart/400
         for i=(1:length(y_centroids))
@@ -115,6 +123,9 @@ for ecart=100:20:milieu_feuille_vertical
             end
         end
     end
+    x_centroids(deja_scannes) = []; %Suppression des points déjà scannés
+    y_centroids(deja_scannes) = [];
+    deja_scannes = []; %réinitialisation de la liste
 end
 figure; imshow(I); hold on;
 for i=(1:length(matrice_colonnes))
