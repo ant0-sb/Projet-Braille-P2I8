@@ -13,7 +13,7 @@ precision_ligne = 4; %Nombre de pixels max entre 2 points d'une même ligne
 precision_col = 5; %Nombre de pixels max entre 2 points d'une même colonne
 
 %% Affichage des centroids
-%figure; imshow(I); hold on; plot(x_centroids,y_centroids, 'b+'); hold off
+figure; imshow(I); hold on; plot(x_centroids,y_centroids, 'b+'); hold off
 
 %% Affichage & stockage des lignes
 deja_scannes = []; %vecteur contenant tout les indices des points déjà analysés 
@@ -21,44 +21,45 @@ matrice_lignes = cell(1,2); %initialisation, on stockera les lignes dans la 1èr
 indice_ligne = 0; %indice utile lors du remplissage de matrice_lignes
 milieu_feuille_horizontal = size(I,2)/2; %valeur en pixels du milieu horizontal de la feuille
 
-for ecart=100:50:milieu_feuille_horizontal+100
+for ecart=100:50:milieu_feuille_horizontal+50 
+    %le +50 permet de scanner toute la feuille sinon ecart n'atteindra pas sa borne supérieure car milieu_feuille_horizontal n'est pas forcement un multiple de 50
     %Partie 1: Détection des lignes les plus sûres en prenant une précision assez stricte
     for i=(1:length(x_centroids)) %boucle sur toutes les coordonnées X des points détectés
-        if not(ismember(i,deja_scannes)) && (milieu_feuille_horizontal-ecart<x_centroids(i) && x_centroids(i)<milieu_feuille_horizontal+ecart) %check pour éviter une redondance et on prend une référence dont la coordonnée X est au milieu de la feuille pour augmenter la précision si jamais l'image n'est pas parfaitement rotationnée
+        if not(ismember(i,deja_scannes)) && (milieu_feuille_horizontal-ecart<x_centroids(i) && x_centroids(i)<milieu_feuille_horizontal+ecart) %check pour éviter une redondance et on prend une référence dont la coordonnée X est au milieu de la feuille pour augmenter la précision si jamais l'image n'est pas parfaitement tournée
             ligne_x = [x_centroids(i)]; %coordonnées en X des points de notre ligne
             ligne_y = [y_centroids(i)]; %coordonnées en Y des points de notre ligne
-            indices_valides = find(abs(y_centroids(i)-y_centroids)<precision_ligne);
-            indices_valides(ismember(indices_valides,deja_scannes))=[];
-            ligne_x = [ligne_x x_centroids(indices_valides)'];
+            indices_valides = find(abs(y_centroids(i)-y_centroids)<precision_ligne); %recherche des points alignés horizontalement avec la référence selon le critère précision_ligne
+            indices_valides(ismember(indices_valides,deja_scannes))=[]; %conservation des points pas encore ajoutés à une ligne
+            ligne_x = [ligne_x x_centroids(indices_valides)']; %ajout des points valides
             ligne_y = [ligne_y y_centroids(indices_valides)'];
-            deja_scannes = [deja_scannes indices_valides'];
-            ligne_tot = num2cell([ligne_x ; ligne_y]',2);
-            indice_ligne=indice_ligne+1;
-            matrice_lignes{indice_ligne,1}= ligne_tot;
-            matrice_lignes{indice_ligne,2}= mean(ligne_y);
+            deja_scannes = [deja_scannes indices_valides']; %ajout des points déjà scannés
+            ligne_tot = num2cell([ligne_x ; ligne_y]',2); %creation d'une ligne
+            indice_ligne=indice_ligne+1; %permet d'ajouter une nouvelle à la fin 
+            matrice_lignes{indice_ligne,1}= ligne_tot; %ajout à matrice_ligne
+            matrice_lignes{indice_ligne,2}= mean(ligne_y); %calcul de la moyenne en Y de la ligne
         end
     end
-    x_centroids(deja_scannes) = []; %Suppression des points déjà scannés
+    x_centroids(deja_scannes) = []; %suppression des points déjà scannés
     y_centroids(deja_scannes) = [];
-    deja_scannes = []; %réinitialisation de la liste
+    deja_scannes = []; %réinitialisation de la liste car les points scannés ont été supprimés 
     %Partie 2: Ajout des points appartenant à une ligne mais pas détectés précédemment car trop loin pour rentrer dans les conditions strictes de départ
-    for precision=0.2:0.5:5+ecart/300
-        for i=(1:length(x_centroids))
+    for precision=0.2:0.5:4+ecart/100
+        for i=(1:length(x_centroids)) %boucle sur les points 
             if not(ismember(i,deja_scannes))
-                for m=(1:length(matrice_lignes))
-                    if (abs(y_centroids(i)-matrice_lignes{m,2}) < precision) && not(ismember(i,deja_scannes))%comparaison par rapport à la valeur moyenne d'une ligne
-                        matrice_lignes{m,1}(end+1) = {[x_centroids(i) y_centroids(i)]};
-                        A = vertcat(matrice_lignes{m,1}{:});
-                        matrice_lignes{m,2}=mean(A(:,2));
-                        deja_scannes(end+1) = i;               
-                    end
+                [~,indice_ligne_plus_proche] = min(abs(y_centroids(i)-[matrice_lignes{:,2}])); %récupération de l'indice de la ligne la plus proche du point
+                if (abs(y_centroids(i)-[matrice_lignes{indice_ligne_plus_proche,2}])< precision)
+                    matrice_lignes{indice_ligne_plus_proche,1}(end+1) = {[x_centroids(i) y_centroids(i)]};
+                    A = vertcat(matrice_lignes{indice_ligne_plus_proche,1}{:});
+                    matrice_lignes{indice_ligne_plus_proche,2}=mean(A(:,2));
+                    deja_scannes(end+1) = i;  
                 end
             end
         end
+        x_centroids(deja_scannes) = []; %Suppression des points déjà scannés
+        y_centroids(deja_scannes) = [];
+        deja_scannes = []; %réinitialisation de la liste
     end
-    x_centroids(deja_scannes) = []; %Suppression des points déjà scannés
-    y_centroids(deja_scannes) = [];
-    deja_scannes = []; %réinitialisation de la liste
+    
 end
 figure; imshow(I); hold on;
 for i=(1:length(matrice_lignes))
