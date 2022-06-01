@@ -25,20 +25,14 @@ milieu_feuille_horizontal = size(I,2)/2; %valeur en pixels du milieu horizontal 
 for ecart=100:50:milieu_feuille_horizontal
     for i=(1:length(x_centroids)) %boucle sur toutes les coordonnées X des points détectés
         if not(ismember(i,deja_scannes)) && (milieu_feuille_horizontal-ecart<x_centroids(i) && x_centroids(i)<milieu_feuille_horizontal+ecart) %check pour éviter une redondance et on prend une référence dont la coordonnée X est au milieu de la feuille pour augmenter la précision si jamais l'image n'est pas parfaitement rotationnée
-            deja_scannes(end+1) = i; %on ajoute l'indice du point de réference, pour qu'il ne soit plus analysé
             ligne_x = [x_centroids(i)]; %coordonnées en X des points de notre ligne
             ligne_y = [y_centroids(i)]; %coordonnées en Y des points de notre ligne
-            for j=(1:length(y_centroids))
-                if (abs(y_centroids(i)-y_centroids(j)) < precision_ligne) && not(ismember(j,deja_scannes)) %comparaison des coordonnées Y de 2 points, si < à précision alors ils appartiennent à une même ligne
-                    ligne_x(end+1) = x_centroids(j);
-                    ligne_y(end+1)= y_centroids(j);
-                    deja_scannes(end+1) = j; %on ajoute l'indice du point comparé, pour qu'il ne soit plus analysé
-                end
-            end
-            ligne_tot = cell(1,length(ligne_x)); %initialisation de ligne_tot qui contiendra tout les points d'1 seule ligne
-            for k = (1:length(ligne_x))
-                ligne_tot{k} = [ligne_x(k) ligne_y(k)]; %ajout des points appartenant à une même ligne
-            end
+            indices_valides = find(abs(y_centroids(i)-y_centroids)<precision_ligne);
+            indices_valides(ismember(indices_valides,deja_scannes))=[];
+            ligne_x = [ligne_x x_centroids(indices_valides)'];
+            ligne_y = [ligne_y y_centroids(indices_valides)'];
+            deja_scannes = [deja_scannes indices_valides'];
+            ligne_tot = num2cell([ligne_x ; ligne_y]',2);
             indice_ligne=indice_ligne+1;
             matrice_lignes{indice_ligne,1}= ligne_tot;
             matrice_lignes{indice_ligne,2}= mean(ligne_y);
@@ -78,25 +72,21 @@ deja_scannes = []; %vecteur contenant tous les indices des points déjà analys�
 matrice_colonnes = cell(1,3); %initialisation, on stockera les colonnes dans la 1ère colonne, les valeurs moyennes de chaque colonne dans la 2e et les médianes dans la 3e
 indice_col = 0; %indice utile lors du remplissage de matrice_colonnes
 milieu_feuille_vertical = size(I,1)/2; %valeur en pixels du milieu horizontal de la feuille
+x_centroids = c(:,1); %Coordonnées X des points détectés
+y_centroids = c(:,2); %Coordonnées Y des points détectés
 
 for ecart=100:20:milieu_feuille_vertical
     %Partie 1: Détection des colonnes les plus sûres en prenant une précision assez stricte
     for i=(1:length(y_centroids)) %boucle sur toutes les coordonnées Y des points détectés
         if not(ismember(i,deja_scannes)) && (milieu_feuille_vertical-ecart<y_centroids(i) && y_centroids(i)<milieu_feuille_vertical+ecart) %check pour éviter une redondance et on prends une référence dont la coordonée X est au mileu de la feuille pour augmenter la précision si jamais l'image n'est pas parfaitement rotationée
-            deja_scannes(end+1) = i; %on ajoute l'indice du point de réference, pour qu'il ne soit plus analysé
-            col_x = [x_centroids(i)]; %coordonnées en X des points de notre colonne
-            col_y = [y_centroids(i)]; %coordonnées en Y des points de notre colonne
-            for j=(1:length(x_centroids))
-                if (abs(x_centroids(i)-x_centroids(j)) < precision_col) && not(ismember(j,deja_scannes)) %comparaison des coordonnées Y de 2 points, si < à précision alors ils appartiennent à une même colonne
-                    col_x(end+1) = x_centroids(j);
-                    col_y(end+1)= y_centroids(j);
-                    deja_scannes(end+1) = j; %on ajoute l'indice du point comparé, pour qu'il ne soit plus analysé
-                end
-            end
-            col_tot = cell(1,length(col_x)); %initialisation de col_tot qui contiendra tout les points d'1 seule colonne
-            for k = (1:length(col_x))
-                col_tot{k} = [col_x(k) col_y(k)]; %ajout des points appartenant à une même colonne
-            end
+            col_x = [x_centroids(i)]; %coordonnées en X des points de notre ligne
+            col_y = [y_centroids(i)]; %coordonnées en Y des points de notre ligne
+            indices_valides = find(abs(x_centroids(i)-x_centroids)<precision_col);
+            indices_valides(ismember(indices_valides,deja_scannes))=[];
+            col_x = [col_x x_centroids(indices_valides)'];
+            col_y = [col_y y_centroids(indices_valides)'];
+            deja_scannes = [deja_scannes indices_valides'];
+            col_tot = num2cell([col_x ; col_y]',2);
             indice_col=indice_col+1;
             matrice_colonnes{indice_col,1}= col_tot;
             matrice_colonnes{indice_col,2}= mean(col_x);
@@ -142,7 +132,7 @@ liste_sauts_medianes = zeros(length(liste_medianes)-1,1);
 for i=2:length(liste_medianes)
     liste_sauts_medianes(i-1)=liste_medianes(i)-liste_medianes(i-1);
 end
-saut_median = median(liste_sauts_medianes)
+saut_median = median(liste_sauts_medianes);
 for i=1:length(liste_sauts_medianes)
     if liste_sauts_medianes(i)>1.5*saut_median
         liste_medianes = vertcat(liste_medianes(1:i),(liste_medianes(i+1)+liste_medianes(i))/2,liste_medianes(i+1:end));
