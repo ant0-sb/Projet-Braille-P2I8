@@ -1,9 +1,9 @@
-function matrice_tot = reconnaissance_braille(I)
+function matrice_tot = reconnaissance_points_braille(I)
+
 %Objectif: Trouver les coordonnées des points puis créer la matrice générale correspondante
 
-
 %% Détection des centroids
-%I = imread("treated_data\bw_braillePierre.tif");
+
 st = regionprops(I, 'Centroid'); %structure = matrice de classes
 c = vertcat(st.Centroid); %transforme la structure pour extraire une matrice de double exploitable
 x_centroids = c(:,1); %Coordonnées X des points détectés
@@ -12,12 +12,14 @@ precision_ligne = 4; %Nombre de pixels max entre 2 points d'une même ligne
 precision_col = 5; %Nombre de pixels max entre 2 points d'une même colonne
 
 %% Affichage des centroids
+
 figure; imshow(I); hold on; plot(x_centroids,y_centroids, 'b+');
 title("Feuille de braille avec centroïdes des points affichés")
 drawnow;
 hold off
 
 %% Affichage & stockage des lignes
+
 deja_scannes = []; %vecteur contenant tout les indices des points déjà analysés 
 matrice_lignes = cell(1,2); %initialisation, on stockera les lignes dans la 1ère colonne et les valeurs moyennes en y de chaque ligne dans la 2ème colonne
 indice_ligne = 0; %indice utile lors du remplissage de matrice_lignes
@@ -36,7 +38,7 @@ for ecart=100:50:milieu_feuille_horizontal+50
             ligne_y = [ligne_y y_centroids(indices_valides)'];
             deja_scannes = [deja_scannes indices_valides']; %ajout des points déjà scannés
             ligne_tot = num2cell([ligne_x ; ligne_y]',2); %creation d'une ligne
-            indice_ligne=indice_ligne+1; %permet d'ajouter une nouvelle à la fin 
+            indice_ligne=indice_ligne+1; %permet d'ajouter une nouvelle ligne à la fin 
             matrice_lignes{indice_ligne,1}= ligne_tot; %ajout à matrice_ligne
             matrice_lignes{indice_ligne,2}= mean(ligne_y); %calcul de la moyenne en Y de la ligne
         end
@@ -50,9 +52,9 @@ for ecart=100:50:milieu_feuille_horizontal+50
             if not(ismember(i,deja_scannes))
                 [~,indice_ligne_plus_proche] = min(abs(y_centroids(i)-[matrice_lignes{:,2}])); %récupération de l'indice de la ligne la plus proche du point
                 if (abs(y_centroids(i)-[matrice_lignes{indice_ligne_plus_proche,2}])< precision)
-                    matrice_lignes{indice_ligne_plus_proche,1}(end+1) = {[x_centroids(i) y_centroids(i)]};
+                    matrice_lignes{indice_ligne_plus_proche,1}(end+1) = {[x_centroids(i) y_centroids(i)]}; %ajout du point à la ligne
                     A = vertcat(matrice_lignes{indice_ligne_plus_proche,1}{:});
-                    matrice_lignes{indice_ligne_plus_proche,2}=mean(A(:,2));
+                    matrice_lignes{indice_ligne_plus_proche,2}=mean(A(:,2));%calcul de la nouvelle moyenne en X de la colonne
                     deja_scannes(end+1) = i;  
                 end
             end
@@ -79,22 +81,23 @@ milieu_feuille_vertical = size(I,1)/2; %valeur en pixels du milieu horizontal de
 x_centroids = c(:,1); %Coordonnées X des points détectés
 y_centroids = c(:,2); %Coordonnées Y des points détectés
 
-for ecart=100:20:milieu_feuille_vertical
+for ecart=100:20:milieu_feuille_vertical+20
+    %le +20 permet de scanner toute la feuille sinon ecart n'atteindra pas sa borne supérieure car milieu_feuille_vertical n'est pas forcement un multiple de 20
     %Partie 1: Détection des colonnes les plus sûres en prenant une précision assez stricte
     for i=(1:length(y_centroids)) %boucle sur toutes les coordonnées Y des points détectés
         if not(ismember(i,deja_scannes)) && (milieu_feuille_vertical-ecart<y_centroids(i) && y_centroids(i)<milieu_feuille_vertical+ecart) %check pour éviter une redondance et on prends une référence dont la coordonée X est au mileu de la feuille pour augmenter la précision si jamais l'image n'est pas parfaitement rotationée
             col_x = [x_centroids(i)]; %coordonnées en X des points de notre ligne
             col_y = [y_centroids(i)]; %coordonnées en Y des points de notre ligne
-            indices_valides = find(abs(x_centroids(i)-x_centroids)<precision_col);
-            indices_valides(ismember(indices_valides,deja_scannes))=[];
-            col_x = [col_x x_centroids(indices_valides)'];
+            indices_valides = find(abs(x_centroids(i)-x_centroids)<precision_col); %recherche des points alignés verticalement avec la référence selon le critère précision_colonne
+            indices_valides(ismember(indices_valides,deja_scannes))=[]; %conservation des points pas encore ajoutés à une colonne
+            col_x = [col_x x_centroids(indices_valides)']; %ajout des points valides
             col_y = [col_y y_centroids(indices_valides)'];
-            deja_scannes = [deja_scannes indices_valides'];
-            col_tot = num2cell([col_x ; col_y]',2);
-            indice_col=indice_col+1;
-            matrice_colonnes{indice_col,1}= col_tot;
-            matrice_colonnes{indice_col,2}= mean(col_x);
-            matrice_colonnes{indice_col,3}= median(col_x);
+            deja_scannes = [deja_scannes indices_valides']; %ajout des points déjà scannés
+            col_tot = num2cell([col_x ; col_y]',2);  %creation d'une colonne
+            indice_col=indice_col+1; %permet d'ajouter une nouvelle colonne à la fin 
+            matrice_colonnes{indice_col,1}= col_tot; %ajout à matrice_colonne
+            matrice_colonnes{indice_col,2}= mean(col_x); %calcul de la moyenne en X de la colonne
+            matrice_colonnes{indice_col,3}= median(col_x); %calcul de la médianne en X de la colonne
 
         end
     end
@@ -103,23 +106,21 @@ for ecart=100:20:milieu_feuille_vertical
     deja_scannes = []; %réinitialisation de la liste
     %Partie 2: Ajout des points appartenant à une colonne mais pas détectés précédemment car trop loin pour rentrer dans les conditions strictes de départ
     for precision=0.2:0.2:4+ecart/400
-        for i=(1:length(y_centroids))
+        for i=(1:length(y_centroids)) %boucle sur les points
             if not(ismember(i,deja_scannes))
-                for m=(1:length(matrice_colonnes))
-                    if (abs(x_centroids(i)-matrice_colonnes{m,2}) < precision) %comparaison par rapport à la valeur moyenne d'une colonne
-                        matrice_colonnes{m}(end+1) = {[x_centroids(i) y_centroids(i)]};
-                        A = vertcat(matrice_colonnes{m}{:});
-                        matrice_colonnes{m,2}=mean(A(:,1));
-                        matrice_colonnes{m,3}=median(A(:,1));                            
-                        deja_scannes(end+1) = i;              
-                    end
+                [~,indice_colonne_plus_proche] = min(abs(x_centroids(i)-[matrice_colonnes{:,2}])); %récupération de l'indice de la colonne la plus proche du point
+                if (abs(x_centroids(i)-[matrice_colonnes{indice_colonne_plus_proche,2}])< precision)
+                    matrice_colonnes{indice_colonne_plus_proche,1}(end+1) = {[x_centroids(i) y_centroids(i)]}; %ajout du point à la colonne
+                    A = vertcat(matrice_colonnes{indice_colonne_plus_proche,1}{:});
+                    matrice_colonnes{indice_colonne_plus_proche,2}=mean(A(:,1)); %calcul de la nouvelle moyenne en X de la colonne
+                    deja_scannes(end+1) = i;  
                 end
             end
         end
+        x_centroids(deja_scannes) = []; %Suppression des points déjà scannés
+        y_centroids(deja_scannes) = [];
+        deja_scannes = []; %réinitialisation de la liste
     end
-    x_centroids(deja_scannes) = []; %Suppression des points déjà scannés
-    y_centroids(deja_scannes) = [];
-    deja_scannes = []; %réinitialisation de la liste
 end
 figure; imshow(I); hold on;
 title("Organisation des points par colonnes");
@@ -129,7 +130,9 @@ for i=(1:length(matrice_colonnes))
      plot(A(:,1),A(:,2),'-','LineWidth',3)
 end
 hold off
+
 %% Matrice finale
+
 matrice_lignes = sortrows(matrice_lignes,2);
 matrice_colonnes = sortrows(matrice_colonnes,2);
 liste_medianes = vertcat(matrice_colonnes{:,3});
@@ -149,7 +152,7 @@ matrice_tot=zeros(length(matrice_lignes),length(matrice_colonnes));
 for i=1 : length(matrice_lignes)
     for j=1 : length (matrice_lignes{i}) %tous les points de la ligne i
        difference = abs(liste_medianes - matrice_lignes{i}{j}(1));
-       [M,I] = min(difference); %on récupère l'index du min correspondant à la colonne à laquelle appartient le point
+       [~,I] = min(difference); %on récupère l'index du min correspondant à la colonne à laquelle appartient le point
        matrice_tot(i,I) = 1;
     end
 end

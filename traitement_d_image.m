@@ -1,5 +1,5 @@
 function BW1short = traitement_d_image(im0) 
-%% mise en échelle de gris puis binarization de l'image
+%% Mise en échelle de gris puis binarization de l'image
 figure;
 im1 = rgb2gray(im0);
 imshow(im1)
@@ -8,7 +8,7 @@ drawnow;
 figure; 
 BW = imbinarize(im1, 0.7);
 BW = imcomplement (BW);
-%% filtrage de l'image
+%% Filtrage de l'image
 BW = imdilate (BW, strel('disk',1));
 BW1 = bwpropfilt(BW,'Area', [0 50]);
 BW2 = xor(bwareaopen(BW,0),  bwareaopen(BW,50));

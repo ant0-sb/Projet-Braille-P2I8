@@ -1,10 +1,10 @@
 function phrase = traduction (matrice_tot)
 
-%% initialization des caractères
+%% Initialization des caractères
 
 [listelettres,listechiffres, listeappartenance, listequantificateurs, listequivalent, listespeciale] = alphabet();
 
-%% découpage de la matrice totale en une suite de matrices caractères
+%% Découpage de la matrice totale en une suite de matrices caractères
 A = matrice_tot;
 [lignlength, columnlength] = size(A);
 lignnumber  = lignlength/3 -1;
@@ -19,7 +19,7 @@ for n = 0 : lignnumber
     
 end
 
-%% traduction des caractères
+%% Traduction des caractères
 swaplist = 0;
 phrase = strings(50); %matrice de strings, nombre défini arbitrairement et à étendre pour des textes plus longs
 k = 1; %numéro de la ligne lors de la traduction du texte
@@ -46,6 +46,7 @@ for n = 1:length(braille) %parcours l'ensemble de la phrase en braille à décod
     for lettreref = liste %compare une lettre de la phrase en braille à toutes celles de la liste choisie juqu'à détecter une correspondance
         %détermine si la liste doit changer à la prochaine itération de la
         %boucle
+
         if isequal(braille{n},lettreref.valeur)
             if (swaplist == 3) %certaines balises d'interprétation ne sont valables que pour un caractère par convention, on les fait donc stopper ici pour l'itération suivante
                 swaplist = 0;
@@ -84,8 +85,10 @@ for n = 1:length(braille) %parcours l'ensemble de la phrase en braille à décod
             
             %décalage ASCII éventuel lors de l'apparition d'une majuscule
             if (lettreref.caractere == "caps")
+
                 %empêche le décalage ASCII pour les symboles balisés par le
                 %signe des majuscule, ici les accolades
+
                 if (~(isequal(braille{n+1},[0,0;1,0;1,1]) || isequal(braille{n+1},[0,0;0,1;1,1])) )
                     capshift = 32;
                 end
@@ -97,8 +100,7 @@ for n = 1:length(braille) %parcours l'ensemble de la phrase en braille à décod
                             finexposant = true;
                         end
                     end
-                    %assure un saut de ligne (changement de String) si
-                    %plusieurs espaces consécutifs sont détectés
+                    %assure un saut de ligne (changement de String) si plusieurs espaces consécutifs sont détectés
                     if (lettreref.caractere == ' ')
                         if(n < length(braille))
                             if (isequal (braille{n+1}, lettreref.valeur) && ~isequal (braille{n-1}, lettreref.valeur)) %permet de limiter le saut de ligne au premier espace d'une fin de ligne, afin que ceux-ci ne s'enchaînent pas tant qu'un caractère non nul n'est pas détecté
@@ -126,4 +128,3 @@ for n = 1:length(braille) %parcours l'ensemble de la phrase en braille à décod
         end
     end
 end
-            
