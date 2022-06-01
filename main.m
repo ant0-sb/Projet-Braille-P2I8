@@ -8,9 +8,10 @@ I = imread("raw_data\"+nom_image+".jpg"); %lecture de la photo
 
 I_traitee = traitement_d_image(I); %traitement de la photo
 
-imwrite(I_traitee,"treated_data\"+nom_image+"_traitee.tif") %sauvegarde du traitement
+%imwrite(I_traitee,"treated_data\"+nom_image+"_traitee.tif") %sauvegarde du traitement
 
 matrice_binaire = reconnaissance_points_braille(I_traitee); %création de l'équivalent de la photo en matrice de 0 et 1
 
 texte = traduction(matrice_binaire); %traduction de la matrice binaire équivalente
 %% Le texte traduit peut être récupéré et lu dans la variable texte.
+disp(texte(:,1));

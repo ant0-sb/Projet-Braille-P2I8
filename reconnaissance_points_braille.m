@@ -11,13 +11,6 @@ y_centroids = c(:,2); %Coordonnées Y des points détectés
 precision_ligne = 4; %Nombre de pixels max entre 2 points d'une même ligne
 precision_col = 5; %Nombre de pixels max entre 2 points d'une même colonne
 
-%% Affichage des centroids
-
-figure; imshow(I); hold on; plot(x_centroids,y_centroids, 'b+');
-title("Feuille de braille avec centroïdes des points affichés")
-drawnow;
-hold off
-
 %% Affichage & stockage des lignes
 
 deja_scannes = []; %vecteur contenant tout les indices des points déjà analysés 
@@ -65,9 +58,6 @@ for ecart=100:50:milieu_feuille_horizontal+50
     end
     
 end
-figure; imshow(I); hold on;
-title("Organisation des points par lignes");
-drawnow;
 for i=(1:length(matrice_lignes))
      A = vertcat(matrice_lignes{i}{:});
      plot(A(:,1),A(:,2),'-','LineWidth',3)
@@ -122,14 +112,11 @@ for ecart=100:20:milieu_feuille_vertical+20
         deja_scannes = []; %réinitialisation de la liste
     end
 end
-figure; imshow(I); hold on;
-title("Organisation des points par colonnes");
-drawnow;
+
 for i=(1:length(matrice_colonnes))
      A = vertcat(matrice_colonnes{i}{:});
      plot(A(:,1),A(:,2),'-','LineWidth',3)
 end
-hold off
 
 %% Matrice finale
 
