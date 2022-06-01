@@ -1,11 +1,11 @@
+function I = traitement(I)
+
 %Objectif : Modification de l'image de orginiale pour permettre plus tard une reconaissance plus facile
-clc
-clear
-close all
+
 
 % Chargement de l'image
-name_image = "braille_scan";
-I = imread("raw_data/"+name_image,'jpg');
+%name_image = "braille_scan";
+%I = imread("raw_data/"+name_image,'jpg');
 
 % Binarisation de l'image
 if ndims(I)==3 % Test si l'image est en RGB
@@ -42,4 +42,5 @@ end
 I = imrotate(I,angleParfait); % Rotation finale de l'image
 
 % Sauvegarde de l'image
-imwrite(I,"treated_data/bw_"+name_image+".tif");
+imshow(I)
+%imwrite(I,"treated_data/bw_"+name_image+".tif");

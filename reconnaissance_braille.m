@@ -1,10 +1,9 @@
+function matrice_tot = reconnaissance_braille(I)
 %Objectif: Trouver les coordonnées des points puis créer la matrice générale correspondante
-clc
-clear
-close all
+
 
 %% Détection des centroids
-I = imread("treated_data\bw_braillePierre.tif");
+%I = imread("treated_data\bw_braillePierre.tif");
 st = regionprops(I, 'Centroid'); %structure = matrice de classes
 c = vertcat(st.Centroid); %transforme la structure pour extraire une matrice de double exploitable
 x_centroids = c(:,1); %Coordonnées X des points détectés
@@ -13,7 +12,10 @@ precision_ligne = 4; %Nombre de pixels max entre 2 points d'une même ligne
 precision_col = 5; %Nombre de pixels max entre 2 points d'une même colonne
 
 %% Affichage des centroids
-figure; imshow(I); hold on; plot(x_centroids,y_centroids, 'b+'); hold off
+figure; imshow(I); hold on; plot(x_centroids,y_centroids, 'b+');
+title("Feuille de braille avec centroïdes des points affichés")
+drawnow;
+hold off
 
 %% Affichage & stockage des lignes
 deja_scannes = []; %vecteur contenant tout les indices des points déjà analysés 
@@ -62,6 +64,8 @@ for ecart=100:50:milieu_feuille_horizontal+50
     
 end
 figure; imshow(I); hold on;
+title("Organisation des points par lignes");
+drawnow;
 for i=(1:length(matrice_lignes))
      A = vertcat(matrice_lignes{i}{:});
      plot(A(:,1),A(:,2),'-','LineWidth',3)
@@ -118,6 +122,8 @@ for ecart=100:20:milieu_feuille_vertical
     deja_scannes = []; %réinitialisation de la liste
 end
 figure; imshow(I); hold on;
+title("Organisation des points par colonnes");
+drawnow;
 for i=(1:length(matrice_colonnes))
      A = vertcat(matrice_colonnes{i}{:});
      plot(A(:,1),A(:,2),'-','LineWidth',3)
