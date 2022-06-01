@@ -13,7 +13,7 @@ precision_ligne = 4; %Nombre de pixels max entre 2 points d'une même ligne
 precision_col = 5; %Nombre de pixels max entre 2 points d'une même colonne
 
 %% Affichage des centroids
-%figure; imshow(imread("raw_data\braillePierre.jpg")); hold on; plot(x_centroids,y_centroids, 'b+'); hold off
+%figure; imshow(I); hold on; plot(x_centroids,y_centroids, 'b+'); hold off
 
 %% Affichage & stockage des lignes
 deja_scannes = []; %vecteur contenant tout les indices des points déjà analysés 
@@ -21,8 +21,8 @@ matrice_lignes = cell(1,2); %initialisation, on stockera les lignes dans la 1èr
 indice_ligne = 0; %indice utile lors du remplissage de matrice_lignes
 milieu_feuille_horizontal = size(I,2)/2; %valeur en pixels du milieu horizontal de la feuille
 
-%Partie 1: Détection des lignes les plus sûres en prenant une précision assez stricte
-for ecart=100:50:milieu_feuille_horizontal
+for ecart=100:50:milieu_feuille_horizontal+100
+    %Partie 1: Détection des lignes les plus sûres en prenant une précision assez stricte
     for i=(1:length(x_centroids)) %boucle sur toutes les coordonnées X des points détectés
         if not(ismember(i,deja_scannes)) && (milieu_feuille_horizontal-ecart<x_centroids(i) && x_centroids(i)<milieu_feuille_horizontal+ecart) %check pour éviter une redondance et on prend une référence dont la coordonnée X est au milieu de la feuille pour augmenter la précision si jamais l'image n'est pas parfaitement rotationnée
             ligne_x = [x_centroids(i)]; %coordonnées en X des points de notre ligne
@@ -45,7 +45,6 @@ for ecart=100:50:milieu_feuille_horizontal
     for precision=0.2:0.5:5+ecart/300
         for i=(1:length(x_centroids))
             if not(ismember(i,deja_scannes))
-
                 for m=(1:length(matrice_lignes))
                     if (abs(y_centroids(i)-matrice_lignes{m,2}) < precision) && not(ismember(i,deja_scannes))%comparaison par rapport à la valeur moyenne d'une ligne
                         matrice_lignes{m,1}(end+1) = {[x_centroids(i) y_centroids(i)]};
@@ -61,7 +60,7 @@ for ecart=100:50:milieu_feuille_horizontal
     y_centroids(deja_scannes) = [];
     deja_scannes = []; %réinitialisation de la liste
 end
-imshow(I); hold on;
+figure; imshow(I); hold on;
 for i=(1:length(matrice_lignes))
      A = vertcat(matrice_lignes{i}{:});
      plot(A(:,1),A(:,2),'-','LineWidth',3)
